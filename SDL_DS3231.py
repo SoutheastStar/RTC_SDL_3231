@@ -1,41 +1,16 @@
 #!/usr/bin/env python
 
 # SDL_DS3231.py Python Driver Code
-# SwitchDoc Labs 12/19/2014
-# V 1.2
-# only works in 24 hour mode
 # now includes reading and writing the AT24C32 included on the SwitchDoc Labs 
-#  DS3231 / AT24C32 Module (www.switchdoc.com
+# DS3231 / AT24C32 Module
 
 
 #encoding: utf-8
  
-# Copyright (C) 2013 @XiErCh
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 from datetime import datetime
 from OmegaExpansion import onionI2C
 
 import time
-# import smbus
-
 
 def _bcd_to_int(bcd):
     """Decode a 2x4bit BCD to a integer.
@@ -71,7 +46,7 @@ class SDL_DS3231():
     _REG_DATE = 0x04
     _REG_MONTH = 0x05
     _REG_YEAR = 0x06
-    _REG_CONTROL = 0x07
+    _REG_CONTROL = 0x0E
 
 
 
@@ -79,23 +54,18 @@ class SDL_DS3231():
     # DS3231 Code
     ###########################
     def __init__(self, twi=0, addr=0x68, at24c32_addr=0x56):
-        # self._bus = smbus.SMBus(twi)
         self._i2c = onionI2C.OnionI2C(twi)
         self._addr = addr
         self._at24c32_addr = at24c32_addr
 
 
     def _write(self, register, data):
-        #print "addr =0x%x register = 0x%x data = 0x%x %i " % (self._addr, register, data,_bcd_to_int(data))
-        # self._bus.write_byte_data(self._addr, register, data)
         self._i2c.writeByte(self._addr, register, data)
 
 
     def _read(self, data):
 
-        # returndata = self._bus.read_byte_data(self._addr, data)
         returndata = self._i2c.readBytes(self._addr, data, 1)
-        #print "addr = 0x%x data = 0x%x %i returndata = 0x%x %i " % (self._addr, data, data, returndata, _bcd_to_int(returndata))
         return returndata[0]
 
 
@@ -215,9 +185,6 @@ class SDL_DS3231():
 
 
     def getTemp(self):
-        # byte_tmsb = self._bus.read_byte_data(self._addr,0x11)
-        # byte_tlsb = bin(self._bus.read_byte_data(self._addr,0x12))[2:].zfill(8)
-        # return byte_tmsb+int(byte_tlsb[0])*2**(-1)+int(byte_tlsb[1])*2**(-2)
         byte_tmsb = self._i2c.readBytes(self._addr, 0x11, 1)
         byte_tlsb = bin(self._i2c.readBytes(self._addr, 0x12 ,1))[2:].zfill(8)
         return byte_tmsb+int(byte_tlsb[0])*2**(-1)+int(byte_tlsb[1])*2**(-2)
@@ -233,17 +200,9 @@ class SDL_DS3231():
 
   
     def read_AT24C32_byte(self, address):
-        #print "i2c_address =0x%x eepromaddress = 0x%x  " % (self._at24c32_addr, address)
-
-        # self.set_current_AT24C32_address(address)
-        # return self._bus.read_byte(self._at24c32_addr)
         return self._i2c.readBytes(self._at24c32_addr, address, 1)
 
 
     def write_AT24C32_byte(self, address, value):
-        #print "i2c_address =0x%x eepromaddress = 0x%x value = 0x%x %i " % (self._at24c32_addr, address, value, value)
-        # a1=address/256;
-        # a0=address%256;
-        # self._bus.write_i2c_block_data(self._at24c32_addr,a1,[a0, value])
         self._i2c.writeBytes(self._at24c32_addr,address,value)
         time.sleep(0.20)
