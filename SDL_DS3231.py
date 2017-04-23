@@ -53,8 +53,8 @@ class SDL_DS3231():
     ###########################
     # DS3231 Code
     ###########################
-    def __init__(self, twi=0, addr=0x68, at24c32_addr=0x56):
-        self._i2c = onionI2C.OnionI2C(twi)
+    def __init__(self, addr=0x68, at24c32_addr=0x56):
+        self._i2c = onionI2C.OnionI2C()
         self._addr = addr
         self._at24c32_addr = at24c32_addr
 
@@ -95,7 +95,10 @@ class SDL_DS3231():
 
 
     def _read_month(self):
-        return _bcd_to_int(self._read(self._REG_MONTH))
+        m = self._read(self._REG_MONTH)
+        if (m <= 0x60):
+            m = m - 0x60
+        return _bcd_to_int(m)
 
 
     def _read_year(self):
@@ -136,8 +139,8 @@ class SDL_DS3231():
         if seconds is not None:
             if seconds < 0 or seconds > 59:
                 raise ValueError('Seconds is out of range [0,59].')
-            seconds_reg = _int_to_bcd(seconds)
-            self._write(self._REG_SECONDS, seconds_reg)
+            #seconds_reg = _int_to_bcd(seconds)
+            self._write(self._REG_SECONDS, _int_to_bcd(seconds))#seconds_reg)
 
         if minutes is not None:
             if minutes < 0 or minutes > 59:
