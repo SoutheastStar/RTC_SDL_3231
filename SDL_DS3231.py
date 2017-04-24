@@ -96,9 +96,23 @@ class SDL_DS3231():
 
     def _read_month(self):
         m = self._read(self._REG_MONTH)
-        if (m <= 0x60):
-            m = m - 0x60
-        return _bcd_to_int(m)
+'''        if (m >= 0x80):
+            m = m - 0x80
+        if (m >= 0x80):
+            m = m - 0x40
+        if (m >= 0x80):
+            m = m - 0x20
+        if (m >= 0x10):
+            m = m - 0x10
+        if (m >= 0x08):
+            m = m - 0x08'''
+        m10 = m[4]
+
+        mU = _bcd_to_int(m[3]|m[2]|m[1]|m[0])
+
+        m = (m10*10 + mU)
+
+        return m
 
 
     def _read_year(self):
