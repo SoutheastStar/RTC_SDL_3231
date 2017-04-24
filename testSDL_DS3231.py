@@ -22,7 +22,7 @@ print("")
 filename = time.strftime("%Y-%m-%d%H:%M:%SRTCTest") + ".txt"
 start_time = datetime.datetime.utcnow()
 
-ds3231 = SDL_DS3231.SDL_DS3231(1, 0x68)
+ds3231 = SDL_DS3231.SDL_DS3231(0x68)
 # comment out the next line after the clock has been initialized
 ds3231.write_now()
 
@@ -35,6 +35,7 @@ while True:
     print("")
     print("Raspberry Pi=\t" + time.strftime("%Y-%m-%d %H:%M:%S"))
     print("DS3231=\t\t%s" % ds3231.read_datetime())
+    print("DS3231=\t\t%s" % ds3231._read_seconds())
 
-    print("DS3231 Temp=", ds3231.get_temp())
+#    print("DS3231 Temp=", ds3231.get_temp())
     time.sleep(10.0)

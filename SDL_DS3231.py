@@ -95,24 +95,8 @@ class SDL_DS3231():
 
 
     def _read_month(self):
-        m = self._read(self._REG_MONTH)
-'''        if (m >= 0x80):
-            m = m - 0x80
-        if (m >= 0x80):
-            m = m - 0x40
-        if (m >= 0x80):
-            m = m - 0x20
-        if (m >= 0x10):
-            m = m - 0x10
-        if (m >= 0x08):
-            m = m - 0x08'''
-        m10 = m[4]
-
-        mU = _bcd_to_int(m[3]|m[2]|m[1]|m[0])
-
-        m = (m10*10 + mU)
-
-        return m
+        return _bcd_to_int(self._read(self._REG_MONTH))
+        
 
 
     def _read_year(self):
@@ -201,7 +185,7 @@ class SDL_DS3231():
 
 
 
-    def getTemp(self):
+    def get_temp(self):
         byte_tmsb = self._i2c.readBytes(self._addr, 0x11, 1)
         byte_tlsb = bin(self._i2c.readBytes(self._addr, 0x12 ,1))[2:].zfill(8)
         return byte_tmsb+int(byte_tlsb[0])*2**(-1)+int(byte_tlsb[1])*2**(-2)
