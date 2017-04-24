@@ -186,9 +186,17 @@ class SDL_DS3231():
 
 
     def get_temp(self):
-        byte_tmsb = self._i2c.readBytes(self._addr, 0x11, 1)
-        byte_tlsb = bin(self._i2c.readBytes(self._addr, 0x12 ,1))[2:].zfill(8)
-        return byte_tmsb+int(byte_tlsb[0])*2**(-1)+int(byte_tlsb[1])*2**(-2)
+        byte_tmsb = _bcd_to_int(self._i2c.readBytes(self._addr, 0x11, 1))
+        byte_tlsb = _bcd_to_int(self._i2c.readBytes(self._addr, 0x12 ,1) >> 6)
+        if byte_tlsb == 3:
+            tlsb = 0.75
+        elif byte_tlsb == 2:
+            tlsb = 0.50
+        elif byte_tlsb == 1:
+            tlsb = 0.25
+        else:
+            tlsb = 0.00                
+        return byte_tmsb + tlsb
 
     ###########################
     # AT24C32 Code
