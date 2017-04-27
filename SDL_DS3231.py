@@ -24,6 +24,18 @@ def _bcd_to_int(bcd):
         out *= 10
     return out / 10
 
+def _bcdtoint(bcd1):
+    """Decode a 1x8bit BCD to a integer.
+    """
+    out = 0
+    for d in (bcd1 >> 8, bcd1):
+        for p in (1, 2, 4, 8, 16, 32, 68, 128):
+            if d & 1:
+                out += p
+            d >>= 1
+        out *= 10
+    return out / 10
+
 
 def _int_to_bcd(n):
     """Encode a one or two digits number to the BCD.
@@ -47,6 +59,8 @@ class SDL_DS3231():
     _REG_MONTH = 0x05
     _REG_YEAR = 0x06
     _REG_CONTROL = 0x0E
+    _REG_TMSB = 0x11
+    _REG_TLSB = 0x12
 
 
 
@@ -186,13 +200,13 @@ class SDL_DS3231():
 
 
     def get_temp(self):
-        byte_tmsb = _bcd_to_int(self._i2c.readBytes(self._addr, 0x11, 1))
-        byte_tlsb = _bcd_to_int(self._i2c.readBytes(self._addr, 0x12 ,1) >> 6)
-        if byte_tlsb == 3:
+        byte_tmsb = _bcdtoint(self._read(self._REG_TMSB))
+        byte_tlsb = _bcdtoint(self._read(self._REG_TLSB))
+        if byte_tlsb == 192:
             tlsb = 0.75
-        elif byte_tlsb == 2:
+        elif byte_tlsb == 128:
             tlsb = 0.50
-        elif byte_tlsb == 1:
+        elif byte_tlsb == 64:
             tlsb = 0.25
         else:
             tlsb = 0.00                
